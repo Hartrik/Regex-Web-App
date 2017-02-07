@@ -1,0 +1,6 @@
+{
+  "name": "Java 8 Regex Designer",
+  "description": "Java 8 Regex Designer web app",
+  "image": "heroku/java",
+  "addons": [ "heroku-postgresql" ]
+}
