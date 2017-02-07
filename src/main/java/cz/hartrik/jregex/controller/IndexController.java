@@ -1,10 +1,7 @@
 package cz.hartrik.jregex.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  *
@@ -15,16 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class IndexController {
 
     @RequestMapping({"", "/index"})
-    public String indexHandler(Model model) {
-        model.addAttribute("message", "Hello");
-
+    public String indexHandler() {
         return "index";
-    }
-
-    @RequestMapping("*")
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String fallbackHandler() {
-        return "404";
     }
 
 }

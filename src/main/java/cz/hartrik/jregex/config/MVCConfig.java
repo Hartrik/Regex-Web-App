@@ -17,12 +17,16 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
  */
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "cz.hartrik.jregex.controller")
+@ComponentScan(basePackages = {
+    "cz.hartrik.jregex.controller",
+    "cz.hartrik.jregex.service"}
+)
 public class MVCConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry reg) {
         reg.addResourceHandler("/css/**").addResourceLocations("/css/");
+        reg.addResourceHandler("/js/**").addResourceLocations("/js/");
     }
 
     @Bean
