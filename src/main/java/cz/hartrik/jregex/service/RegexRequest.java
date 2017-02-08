@@ -16,8 +16,8 @@ public class RegexRequest {
 
     @JsonCreator
     public RegexRequest(
-            @JsonProperty("pattern") String pattern,
-            @JsonProperty("inputs") List<String> inputs) {
+            @JsonProperty(value = "pattern", required = true) String pattern,
+            @JsonProperty(value = "inputs", required = true) List<String> inputs) {
 
         this.pattern = pattern;
         this.inputs = inputs;
