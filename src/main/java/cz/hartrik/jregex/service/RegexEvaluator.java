@@ -19,7 +19,12 @@ public class RegexEvaluator {
     }
 
     public RegexResponse<MatchResult> match(RegexRequest request) {
-        Pattern p = createPattern(request);
+        Pattern p;
+        try {
+            p = createPattern(request);
+        } catch (Exception ex) {
+            return new RegexResponse<>(ex);
+        }
 
         List<MatchResult> results = request.getInputs().stream()
                 .map(input -> doMatch(p.matcher(input)))
