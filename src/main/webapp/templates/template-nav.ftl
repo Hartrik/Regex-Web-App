@@ -2,7 +2,7 @@
   <div class="container">
     <ul class="nav navbar-nav">
       <li>
-        <a href="/"><span class="glyphicon glyphicon-home"></span> Home</a>
+        <a href="/"><strong>Java 8 Regex Designer</strong></a>
       </li>
     </ul>
   </div>

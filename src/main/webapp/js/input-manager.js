@@ -25,49 +25,50 @@ InputManager.prototype.getInputTextArea = function(i) {
 };
 
 InputManager.prototype.addInput = function() {
-    this.count++;
     $(this.target).append(
-            '<div id="input-box_' + this.count + '">'
-                + '<div class="form-group">'
-                + '<label for="input-text_1">Input #' + this.count + '</label>'
-                + '<textarea id="input-text_' + this.count + '" class="form-control" rows="3" spellcheck="false"></textarea>'
+            '<div id="input-box_' + this.count + '" class="input-box row">'
+                + '<div class="col-lg-12">'
+                + '<textarea id="input-text_' + this.count + '" '
+                    + 'class="form-control input-textarea" rows="3" spellcheck="false"></textarea>'
                 + '</div>'
             + '</div>\n');
+    this.count++;
 };
 
 InputManager.prototype.removeInput = function() {
     if (this.count > 1) {
-        this.getInputBox(this.count).remove();
+        this.getInputBox(this.count - 1).remove();
         this.count--;
     }
 };
 
 InputManager.prototype.collectInputs = function() {
     var array = [];
-    for (var i = 1; i <= this.count; i++) {
+    for (var i = 0; i < this.count; i++) {
         array.push(this.getInputTextArea(i).val());
     }
     return array;
 };
 
 InputManager.prototype.showResults = function(response) {
-    var i = 1;
     for (var j in response.results) {
         var result = response.results[j];
+        var box = this.getInputBox(j);
 
-        var color;
         if (result.match) {
-            color = "#00FF00";
+            box.removeClass("test-failed");
+            box.addClass("test-passed");
         } else {
-            color = "#FF0000";
+            box.addClass("test-failed");
+            box.removeClass("test-passed");
         }
-
-        this.getInputBox(i++).css('background-color', color);
     }
 };
 
 InputManager.prototype.clearResults = function() {
-    for (var i = 1; i <= this.count; i++) {
-        this.getInputBox(i).css('background-color', 'white');
+    for (var i = 0; i < this.count; i++) {
+        var box = this.getInputBox(i);
+        box.removeClass("test-failed");
+        box.removeClass("test-passed");
     }
 };

@@ -1,5 +1,48 @@
 
+#box-with-regex {
+    padding-bottom: 20px;
+}
+
 #input-regex {
     font-family: monospace;
     font-size: 18px;
+}
+
+#error-alert {}
+
+#error-alert-content {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.inputs-container {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.input-box {
+    padding: 10px;
+
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: -10px;
+    margin-right: 0px;
+
+    border: 1px solid lightgray;
+    border-left-width: 10px;
+    border-radius: 3px;
+}
+
+.test-passed {
+    border-color: #5cb85c;
+}
+
+.test-failed {
+    border-color: #d9534f;
+}
+
+.input-textarea {
+    font-family: monospace;
+    font-size: 14px;
 }
