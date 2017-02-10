@@ -1,5 +1,7 @@
 package cz.hartrik.jregex.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 /**
  *
- * @version 2017-02-07
+ * @version 2017-02-10
  * @author Patrik Harag
  */
 @Service
@@ -35,7 +37,19 @@ public class RegexEvaluator {
 
     private MatchResult doMatch(Matcher m) {
         boolean matches = m.matches();
-        return new MatchResult(matches);
+
+        return new MatchResult(matches,
+                (matches ? collectGroups(m) : Collections.emptyList()));
+    }
+
+    private List<MatchResult.Group> collectGroups(Matcher m) {
+        List<MatchResult.Group> groups = new ArrayList<>(m.groupCount());
+        for (int i = 1; i <= m.groupCount(); i++) {
+            // group #0 intentionally ignored
+            MatchResult.Group g = new MatchResult.Group(m.start(i), m.end(i));
+            groups.add(g);
+        }
+        return groups;
     }
 
 }

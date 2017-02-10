@@ -17,7 +17,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public class EmbeddedJetty {
 
-    private static final int DEDAULT_PORT = 5000;
+    private static final int DEFAULT_PORT = 5000;
 
     private static final String CONTEXT_PATH = "/";
     private static final String CONFIG_LOCATION_PACKAGE = "cz.hartrik.jregex.config";
@@ -28,7 +28,7 @@ public class EmbeddedJetty {
         String envPort = System.getenv("PORT");
         int port = (envPort != null)
                 ? Integer.valueOf(envPort)
-                : DEDAULT_PORT ;
+                : DEFAULT_PORT;
 
         new EmbeddedJetty().startJetty(port);
     }

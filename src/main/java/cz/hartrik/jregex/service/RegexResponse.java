@@ -7,7 +7,7 @@ import java.util.List;
  * @version 2017-02-08
  * @author Patrik Harag
  */
-public class RegexResponse <T extends Result> {
+public class RegexResponse <T> {
 
     private final String exception;
     private final List<T> results;

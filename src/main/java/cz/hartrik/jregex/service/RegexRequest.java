@@ -2,6 +2,7 @@ package cz.hartrik.jregex.service;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class RegexRequest {
             @JsonProperty(value = "inputs", required = true) List<String> inputs) {
 
         this.pattern = pattern;
-        this.inputs = inputs;
+        this.inputs = Collections.unmodifiableList(inputs);
     }
 
     public String getPattern() {

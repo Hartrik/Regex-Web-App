@@ -95,7 +95,7 @@
       });
 
       $("#input-regex").keyup(function(e) {
-          inputManager.clearResults();
+          inputManager.clearAllResults();
           hideError();
       });
   });

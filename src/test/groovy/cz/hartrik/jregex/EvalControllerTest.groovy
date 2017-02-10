@@ -18,6 +18,11 @@ import org.springframework.web.context.WebApplicationContext
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
+/**
+ *
+ * @version 2017-02-10
+ * @author Patrik Harag
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = [ MVCConfig.class ])
@@ -33,9 +38,9 @@ class EvalControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
-    static final def JSON_UTF8 = MediaType.parseMediaType("application/json;charset=UTF-8");
+    static final JSON_UTF8 = MediaType.parseMediaType("application/json;charset=UTF-8");
 
-    static def toJsonBytes(object) {
+    static toJsonBytes(object) {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsBytes(object);
     }
@@ -43,7 +48,7 @@ class EvalControllerTest {
     // --------------------
 
     @Test
-    void testExampleRequest() {
+    void exampleRequest() {
         mockMvc.perform(get("/eval/example-request").accept(JSON_UTF8))
             .andExpect(status().isOk())
             .andExpect(jsonPath("\$.pattern").exists())
@@ -51,7 +56,7 @@ class EvalControllerTest {
     }
 
     @Test
-    void testMatch() {
+    void matchSimple() {
         mockMvc.perform(post("/eval/match")
                 .contentType(JSON_UTF8)
                 .content(toJsonBytes(RegexRequest.create("a+", ["b", "a", "aa"])))
@@ -63,6 +68,28 @@ class EvalControllerTest {
             .andExpect(jsonPath("\$.results[1].match").value(true))
             .andExpect(jsonPath("\$.results[2].match").value(true))
             .andExpect(jsonPath("\$.results[3]").doesNotExist())
+    }
+
+    @Test
+    void matchPatternError() {
+        mockMvc.perform(post("/eval/match")
+                .contentType(JSON_UTF8)
+                .content(toJsonBytes(RegexRequest.create("a(a", ["aa"])))
+        )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("\$.exception").exists())
+    }
+
+    @Test
+    void matchGroups() {
+        mockMvc.perform(post("/eval/match")
+                .contentType(JSON_UTF8)
+                .content(toJsonBytes(RegexRequest.create("a(b*)a(c*)a", ["abbacca"])))
+        )
+            .andExpect(jsonPath("\$.results[0].groups[0].start").value(1))
+            .andExpect(jsonPath("\$.results[0].groups[0].end").value(3))
+            .andExpect(jsonPath("\$.results[0].groups[1].start").value(4))
+            .andExpect(jsonPath("\$.results[0].groups[1].end").value(6))
     }
 
 }
