@@ -31,4 +31,8 @@ public class RegexRequest {
         return inputs;
     }
 
+    public static RegexRequest create(String pattern, List<String> inputs) {
+        return new RegexRequest(pattern, inputs);
+    }
+
 }
