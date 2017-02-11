@@ -29,13 +29,14 @@ public class RegexEvaluator {
         }
 
         List<MatchResult> results = request.getInputs().stream()
-                .map(input -> doMatch(p.matcher(input)))
+                .map(input -> doMatch(p, input))
                 .collect(Collectors.toList());
 
         return new RegexResponse<>(results);
     }
 
-    private MatchResult doMatch(Matcher m) {
+    private MatchResult doMatch(Pattern p, String input) {
+        Matcher m = p.matcher(input);
         boolean matches = m.matches();
 
         return new MatchResult(matches,

@@ -81,6 +81,29 @@ class EvalControllerTest {
     }
 
     @Test
+    void matchNulls() {
+        // should not throw server error
+
+        mockMvc.perform(post("/eval/match")
+                .contentType(JSON_UTF8)
+                .content(toJsonBytes(RegexRequest.create(null, ["aa"])))
+        )
+            .andExpect(status().isOk())
+
+        mockMvc.perform(post("/eval/match")
+                .contentType(JSON_UTF8)
+                .content(toJsonBytes(RegexRequest.create(".*", null)))
+        )
+            .andExpect(status().isOk())
+
+        mockMvc.perform(post("/eval/match")
+                .contentType(JSON_UTF8)
+                .content(toJsonBytes(RegexRequest.create(".*", [null, null])))
+        )
+            .andExpect(status().isOk())
+    }
+
+    @Test
     void matchGroups() {
         mockMvc.perform(post("/eval/match")
                 .contentType(JSON_UTF8)
