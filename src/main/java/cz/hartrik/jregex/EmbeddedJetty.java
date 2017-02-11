@@ -47,6 +47,7 @@ public class EmbeddedJetty {
     private static ServletContextHandler getServletContextHandler() throws IOException {
         WebApplicationContext webAppContext = getWebApplicationContext();
         DispatcherServlet dispatcherServlet = new DispatcherServlet(webAppContext);
+        dispatcherServlet.setThrowExceptionIfNoHandlerFound(true);  // handling 404
         ServletHolder springServletHolder = new ServletHolder("mvc-dispatcher", dispatcherServlet);
 
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
