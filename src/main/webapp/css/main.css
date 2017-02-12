@@ -34,10 +34,6 @@
     border-radius: 3px;
 }
 
-.input-box table {
-    font-size: 12px;
-}
-
 .test-passed {
     border-color: #5cb85c;
 }
@@ -49,4 +45,20 @@
 .input-textarea {
     font-family: monospace;
     font-size: 14px;
+}
+
+.input-box table {
+    font-size: 12px;
+}
+
+.input-box table td {
+    vertical-align: baseline;
+}
+
+.input-box table .group-content {
+    font-family: monospace;
+}
+
+.input-box table .group-content span {
+    background-color: #5cb85c;
 }

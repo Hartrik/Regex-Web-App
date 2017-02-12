@@ -11,96 +11,205 @@ NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
     }
 };
 
-function InputManager(target) {
-    this.count = 0;
-    this.target = target;
+
+// --- TextAreaComponent
+
+function TextAreaComponent(id) {
+    this.id = id;
 }
 
-InputManager.prototype.getInputBox = function(i) {
-    return $('#input-box_' + i);
+TextAreaComponent.prototype.getTextAreaID = function() {
+    return 'input-text_' + this.id;
 };
 
-InputManager.prototype.getInputTextArea = function(i) {
-    return $('#input-text_' + i);
+TextAreaComponent.prototype.getText = function() {
+    return $('#' + this.getTextAreaID()).val();
 };
 
-InputManager.prototype.addInput = function() {
-    $(this.target).append(
-        '<div id="input-box_' + this.count + '" class="input-box row">'
-            + '<div class="col-lg-12">'
-            + '<textarea id="input-text_' + this.count + '" '
-                + 'class="form-control input-textarea" rows="3" spellcheck="false"></textarea>'
-            + '</div>'
-            + '<div id="input-groups_' + this.count + '" class="col-lg-3" style="display: none;">'
-            + '<table class="table table-hover">'
-            + '<thead><tr><th>ID</th><th>Start</th><th>End</th></tr></thead>'
-            + '<tbody id="' + 'input-groups-rows_' + this.count + '"></tbody>'
-            + '</div>'
-        + '</div>');
-    this.count++;
+TextAreaComponent.prototype.render = function() {
+    return '<textarea id="' + this.getTextAreaID() + '" '
+        + 'class="form-control input-textarea" rows="3" spellcheck="false"></textarea>'
 };
 
-InputManager.prototype.removeInput = function() {
-    if (this.count > 1) {
-        this.getInputBox(this.count - 1).remove();
-        this.count--;
-    }
+TextAreaComponent.prototype.highlight = function(start, end) {
+    var area = $('#' + this.getTextAreaID());
+
+    area.focus();
+    area[0].setSelectionRange(start, end);
 };
 
-InputManager.prototype.collectInputs = function() {
-    var array = [];
-    for (var i = 0; i < this.count; i++) {
-        array.push(this.getInputTextArea(i).val());
-    }
-    return array;
+
+// --- GroupsComponent
+
+function GroupsComponent(id, textAreaComponent) {
+    this.id = id;
+    this.textAreaComponent = textAreaComponent;
+}
+
+GroupsComponent.prototype.getGroupsBox = function() {
+    return $('#input-groups_' + this.id);
 };
 
-InputManager.prototype.showResults = function(response) {
-    for (var i in response.results) {
-        var result = response.results[i];
-        var box = this.getInputBox(i);
+GroupsComponent.prototype.render = function() {
+    var html = '<div id="input-groups_' + this.id + '" class="col-lg-5" style="display: none;">'
+        + '<div class="panel-group">'
+         + '<div class="panel panel-default">'
 
-        this.clearResults(i);
+          + '<div class="panel-heading">'
+           + '<h4 class="panel-title">'
+            + '<a data-toggle="collapse" href="#input-groups-collapse' + this.id + '">Groups</a>'
+           + '</h4>'
+          + '</div>'
 
-        if (result.match) {
-            box.addClass("test-passed");
+          + '<div id="input-groups-collapse' + this.id + '" class="panel-collapse collapse">'
+           + '<div class="panel-body">'
+            + '<table id="group-table_' + this.id + '" class="table table-hover">'
+             + '<thead><tr><th>ID</th><th>Start</th><th>End</th><th>Content</th></tr></thead>'
+             + '<tbody id="' + 'input-groups-rows_' + this.id + '"></tbody>'
+            + '</table>'
+           + '</div>'
+          + '</div>'
 
-            // update groups
-            if (result.groups.length > 0) {
-                var html = "";
-                for (var j in result.groups) {
-                    var group = result.groups[j];
+         + '</div>'
+        + '</div>'
+        + '</div>'
 
-                    html += '<tr>'
-                        + '<td>' + (+j + 1) + '</td>'
-                        + '<td>' + group.start + '</td>'
-                        + '<td>' + group.end + '</td>'
-                        + '</tr>'
-                }
 
-                $('#input-groups-rows_' + i).html(html);
-                $('#input-groups_' + i).show();
-            }
+    return html;
+};
 
-        } else {
-            box.addClass("test-failed");
+GroupsComponent.prototype.showResults = function(result) {
+    if (result.groups.length > 0) {
+        var tableBody = $('#input-groups-rows_' + this.id);
+        tableBody.html('');  // clear
+
+        for (var j in result.groups) {
+            var group = result.groups[j];
+            var content = this.textAreaComponent.getText().substring(group.start, group.end);
+            var hID = 'group-table_' + this.id + "_" + j;
+
+            var html = '<tr>'
+                + '<td>' + (+j + 1) + '</td>'
+                + '<td>' + group.start + '</td>'
+                + '<td>' + group.end + '</td>'
+                + '<td class="group-content"><span>' + content + '</span></td>'
+                + '<td><a id="' + hID + '" class="btn btn-xs btn-default" href="#">Select</a></td>'
+                + '</tr>';
+
+            tableBody.append(html);
+
+            // highlighting
+            (function (id, ac, start, end) {
+                $('#' + id).on('click', function() {
+                    ac.highlight(start, end);
+                });
+            })(hID, this.textAreaComponent, group.start, group.end);
         }
+
+        this.getGroupsBox().show();
     }
 };
 
-InputManager.prototype.clearResults = function(i) {
-    var box = this.getInputBox(i);
+GroupsComponent.prototype.clearResults = function() {
+    this.getGroupsBox().hide();
+};
+
+
+// --- InputBoxComponent
+
+function InputBoxComponent(id) {
+    this.id = id;
+    this.textAreaComponent = new TextAreaComponent(id);
+    this.groupsComponent = new GroupsComponent(id, this.textAreaComponent);
+}
+
+InputBoxComponent.prototype.getBox = function() {
+    return $('#input-box_' + this.id);
+};
+
+InputBoxComponent.prototype.render = function() {
+    return '<div id="input-box_' + this.id + '" class="input-box row">'
+            + '<div class="col-lg-12">'
+            + this.textAreaComponent.render()
+            + '</div>'
+
+            + this.groupsComponent.render()
+        + '</div>';
+};
+
+InputBoxComponent.prototype.showResults = function(result) {
+    this.clearResults();
+
+    var box = this.getBox();
+    if (result.match) {
+        box.addClass("test-passed");
+
+        // update groups
+        this.groupsComponent.showResults(result);
+
+    } else {
+        box.addClass("test-failed");
+    }
+};
+
+InputBoxComponent.prototype.clearResults = function() {
+    var box = this.getBox();
 
     // update style/color
     box.removeClass("test-failed");
     box.removeClass("test-passed");
 
     // update groups
-    $('#input-groups_' + i).hide();
+   this.groupsComponent.clearResults();
+};
+
+
+// --- InputManager
+
+function InputManager(target) {
+    this.count = 0;
+    this.target = target;
+    this.inputs = [];
+}
+
+InputManager.prototype.addInput = function() {
+    var input = new InputBoxComponent(this.count++);
+    this.inputs.push(input);
+
+    // render new input box
+    $(this.target).append(input.render());
+};
+
+InputManager.prototype.removeInput = function() {
+    if (this.count > 1) {
+        var last = this.inputs.pop();
+
+        last.getBox().remove();
+        this.count--;
+    }
+};
+
+InputManager.prototype.collectInputs = function() {
+    return this.inputs.map(function(input) {
+        return input.textAreaComponent.getText();
+    });
+};
+
+InputManager.prototype.showResults = function(response) {
+    for (var i in response.results) {
+        var result = response.results[i];
+        this.inputs[i].showResults(result);
+    }
 };
 
 InputManager.prototype.clearAllResults = function() {
-    for (var i = 0; i < this.count; i++) {
-        this.clearResults(i);
+    this.forEach(function(input) {
+        input.clearResults();
+    });
+};
+
+InputManager.prototype.forEach = function(func) {
+    for (var i in this.inputs) {
+        func(this.inputs[i]);
     }
 };
