@@ -1,6 +1,6 @@
 package cz.hartrik.jregex.controller
 
-import cz.hartrik.jregex.service.RegexRequest
+import cz.hartrik.jregex.dto.RegexRequest
 import org.junit.Test
 import org.springframework.test.web.servlet.ResultActions
 
@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  *
- * @version 2017-02-12
+ * @version 2017-02-13
  * @author Patrik Harag
  */
 class EvalControllerTest extends HelperAbstractMvcTest {
@@ -21,6 +21,9 @@ class EvalControllerTest extends HelperAbstractMvcTest {
         Helper.get(mockMvc, url)
     }
 
+
+    // example
+
     @Test
     void exampleRequest() {
         get("/eval/example-request")
@@ -28,6 +31,8 @@ class EvalControllerTest extends HelperAbstractMvcTest {
                 .andExpect(jsonPath("\$.pattern").exists())
                 .andExpect(jsonPath("\$.inputs").exists())
     }
+
+    // match
 
     @Test
     void matchSimple() {
@@ -42,34 +47,30 @@ class EvalControllerTest extends HelperAbstractMvcTest {
     }
 
     @Test
-    void matchPatternError() {
-        post("/eval/match", RegexRequest.create("a(a", ["aa"]))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("\$.exception").exists())
-    }
-
-    @Test
-    void matchNulls() {
-        // should not throw server error (500)
-        // right now null is treated as ""
-
-        post("/eval/match", RegexRequest.create(null, ["aa"]))
-                .andExpect(status().isOk())
-
-        post("/eval/match", RegexRequest.create(".*", null))
-                .andExpect(status().isOk())
-
-        post("/eval/match", RegexRequest.create(".*", [null, null]))
-                .andExpect(status().isOk())
-    }
-
-    @Test
     void matchGroups() {
         post("/eval/match", RegexRequest.create("a(b*)a(c*)a", ["abbacca"]))
                 .andExpect(jsonPath("\$.results[0].groups[0].start").value(1))
                 .andExpect(jsonPath("\$.results[0].groups[0].end").value(3))
                 .andExpect(jsonPath("\$.results[0].groups[1].start").value(4))
                 .andExpect(jsonPath("\$.results[0].groups[1].end").value(6))
+    }
+
+    // split
+
+    @Test
+    void splitSimple() {
+        post("/eval/split", RegexRequest.create("_", ["a", "a_b"]))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("\$.exception").doesNotExist())
+                .andExpect(jsonPath("\$.results").exists())
+
+                .andExpect(jsonPath("\$.results[0].groups[0].start").value(0))
+                .andExpect(jsonPath("\$.results[0].groups[0].end").value(1))
+
+                .andExpect(jsonPath("\$.results[1].groups[0].start").value(0))
+                .andExpect(jsonPath("\$.results[1].groups[0].end").value(1))
+                .andExpect(jsonPath("\$.results[1].groups[1].start").value(2))
+                .andExpect(jsonPath("\$.results[1].groups[1].end").value(3))
     }
 
 }

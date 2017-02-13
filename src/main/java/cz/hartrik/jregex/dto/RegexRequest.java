@@ -1,4 +1,4 @@
-package cz.hartrik.jregex.service;
+package cz.hartrik.jregex.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

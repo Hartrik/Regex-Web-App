@@ -1,8 +1,8 @@
 package cz.hartrik.jregex.controller;
 
 import cz.hartrik.jregex.service.RegexEvaluator;
-import cz.hartrik.jregex.service.RegexRequest;
-import cz.hartrik.jregex.service.RegexResponse;
+import cz.hartrik.jregex.dto.RegexRequest;
+import cz.hartrik.jregex.dto.RegexResponse;
 import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +30,11 @@ public class EvalController {
     @RequestMapping(value = "match", method = RequestMethod.POST)
     public RegexResponse<?> matchHandler(@RequestBody RegexRequest request) {
         return evaluator.match(request);
+    }
+
+    @RequestMapping(value = "split", method = RequestMethod.POST)
+    public RegexResponse<?> splitHandler(@RequestBody RegexRequest request) {
+        return evaluator.split(request);
     }
 
 }
