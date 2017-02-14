@@ -1,25 +1,37 @@
 <#include "template.ftl">
 
-<#assign page_title="Hello"/>
+<#assign page_title="Java 8 Regex Designer"/>
 
 <#macro page_body>
+
+<script type="text/javascript" src="js/code-generation.js"></script>
+<script type="text/javascript" src="js/input-manager.js"></script>
+<script type="text/javascript">components = []</script>
 
 <!-- regex input -->
 <div id="box-with-regex" class="row">
   <div class="col-lg-10">
     <textarea id="input-regex" class="form-control" rows="3" spellcheck="false"
               placeholder="Type your regex here..."></textarea>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $("#input-regex").keyup(function (e) {
+          components.forEach(function (i) { i.clearAllResults(); });
+          hideError();
+        });
+      });
+    </script>
+
   </div>
   <div class="col-lg-2">
-    <a id="btn-copy-regex" class="btn btn-default" href="#">Copy as Java string...</a>
-
-    <script type="text/javascript" src="js/code-generation.js"></script>
+    <a id="btn-copy-regex" class="btn btn-default" href="#">Copy as Java
+      string...</a>
     <script type="text/javascript">
-      $(document).ready(function() {
-          $('#btn-copy-regex').on('click', function() {
-              var pattern = $('#input-regex').val();
-              ClipboardUtils.copy(CodeGenerator.asJavaString(pattern));
-          });
+      $(document).ready(function () {
+        $('#btn-copy-regex').on('click', function () {
+          var pattern = $('#input-regex').val();
+          ClipboardUtils.copy(CodeGenerator.asJavaString(pattern));
+        });
       });
     </script>
   </div>
@@ -31,11 +43,11 @@
 </div>
 <script type="text/javascript">
   function showError(msg) {
-      $('#error-alert').show();
-      $('#error-alert-content').text(msg);
+    $('#error-alert').show();
+    $('#error-alert-content').text(msg);
   }
   function hideError() {
-      $('#error-alert').hide();
+    $('#error-alert').hide();
   }
 </script>
 
@@ -48,59 +60,45 @@
 </ul>
 
 <div class="tab-content">
-  <div id="t-match" class="tab-pane fade in active">
-    <div id="text-inputs" class="inputs-container"></div>
+  <div id="t-match" class="tab-pane fade in active"></div>
+  <script type="text/javascript">
+    $(document).ready(function () {
 
-    <a id="btn-add-input" class="btn btn-large btn-default"  href="#">+</a>
-    <a id="btn-remove-input" class="btn btn-large btn-default"  href="#">-</a>
-    <a id="btn-eval-match" class="btn btn-large btn-primary"  href="#">Regex match</a>
+      var builder = function(inputBox) {
+        inputBox
+            .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+            .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))) });
+      };
 
-    <script type="text/javascript" src="js/input-manager.js"></script>
-    <script type="text/javascript">
-  $(document).ready(function() {
-      var inputManager = new InputManager('#text-inputs');
+      var eval = function(ins, request) {
+        request.pattern = $('#input-regex').val();
 
-      inputManager.addInput();
+        $.ajax({
+          type: "POST",
+          url: "/eval/match",
+          data: JSON.stringify(request),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (data) {
+            if (data.exception !== null) {
+              showError(data.exception);
+            } else {
+              hideError();
+              ins.showResults(data);
+            }
+          },
+          failure: showError
+        });
+      };
 
-      $('#btn-add-input').on('click', function() {
-          inputManager.addInput();
-      });
+      var component = new RegexMethodComponent('m', builder, eval);
 
-      $('#btn-remove-input').on('click', function() {
-          inputManager.removeInput();
-      });
+      $('#t-match').html(component.render());
+      component.init();
 
-      $('#btn-eval-match').on('click', function() {
-          var request = {
-              pattern: $('#input-regex').val(),
-              inputs: inputManager.collectInputs()
-          };
-
-          $.ajax({
-              type: "POST",
-              url: "/eval/match",
-              data: JSON.stringify(request),
-              contentType: "application/json; charset=utf-8",
-              dataType: "json",
-              success: function(data) {
-                  if (data.exception !== null) {
-                      showError(data.exception);
-                  } else {
-                      hideError();
-                      inputManager.showResults(data);
-                  }
-              },
-              failure: showError
-          });
-      });
-
-      $("#input-regex").keyup(function(e) {
-          inputManager.clearAllResults();
-          hideError();
-      });
-  });
-    </script>
-  </div>
+      components.push(component);
+    });
+  </script>
 
   <div id="t-find" class="tab-pane fade">
     TODO
@@ -111,7 +109,43 @@
   </div>
 
   <div id="t-split" class="tab-pane fade">
-    TODO
+    <script type="text/javascript">
+      $(document).ready(function () {
+        var builder = function(inputBox) {
+          inputBox
+              .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+              .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
+        };
+
+        var eval = function(ins, request) {
+          request.pattern = $('#input-regex').val();
+
+          $.ajax({
+            type: "POST",
+            url: "/eval/split",
+            data: JSON.stringify(request),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+              if (data.exception !== null) {
+                showError(data.exception);
+              } else {
+                hideError();
+                ins.showResults(data);
+              }
+            },
+            failure: showError
+          });
+        };
+
+        var component = new RegexMethodComponent('s', builder, eval);
+
+        $('#t-split').html(component.render());
+        component.init();
+
+        components.push(component);
+      });
+    </script>
   </div>
 </div>
 

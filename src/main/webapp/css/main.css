@@ -42,6 +42,10 @@
     border-color: #d9534f;
 }
 
+.test-processed {
+    border-color: #0093d9;
+}
+
 .input-textarea {
     font-family: monospace;
     font-size: 14px;

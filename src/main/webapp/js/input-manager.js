@@ -12,143 +12,276 @@ NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
 };
 
 
-// --- TextAreaComponent
+// --- BoxModule
 
-function TextAreaComponent(id) {
-    this.id = id;
+function BoxModule(suffix, inputBoxComponent) {}
+
+BoxModule.prototype.render = function() {};
+BoxModule.prototype.createRequest = function(request) {};
+BoxModule.prototype.showResults = function(result) {};
+BoxModule.prototype.clearResults = function() {};
+
+
+// --- TextAreaBoxModule extends BoxModule
+
+function TextAreaBoxModule(suffix, inputBoxComponent) {
+    BoxModule.call(this, suffix, inputBoxComponent);
+
+    this.TEXT_AREA = 'input-text_' + suffix;
 }
 
-TextAreaComponent.prototype.getTextAreaID = function() {
-    return 'input-text_' + this.id;
+TextAreaBoxModule.prototype = new BoxModule();
+
+TextAreaBoxModule.prototype.getText = function() {
+   return $('#' + this.TEXT_AREA).val();
 };
 
-TextAreaComponent.prototype.getText = function() {
-    return $('#' + this.getTextAreaID()).val();
+TextAreaBoxModule.prototype.createRequest = function(request) {
+    if (!request.hasOwnProperty('inputs')) {
+        request.inputs = [];
+    }
+
+    request.inputs.push(this.getText());
 };
 
-TextAreaComponent.prototype.render = function() {
-    return '<textarea id="' + this.getTextAreaID() + '" '
-        + 'class="form-control input-textarea" rows="3" spellcheck="false"></textarea>'
+TextAreaBoxModule.prototype.render = function() {
+    return `
+        <div class="col-lg-12">
+          <textarea id="${this.TEXT_AREA}" class="form-control input-textarea"
+              rows="3" spellcheck="false"></textarea>
+        </div>
+    `;
 };
 
-TextAreaComponent.prototype.highlight = function(start, end) {
-    var area = $('#' + this.getTextAreaID());
+TextAreaBoxModule.prototype.select = function(start, end) {
+    var area = $('#' + this.TEXT_AREA);
 
     area.focus();
     area[0].setSelectionRange(start, end);
 };
 
 
-// --- GroupsComponent
+// --- HideableBoxModule extends BoxModule
 
-function GroupsComponent(id, textAreaComponent) {
-    this.id = id;
-    this.textAreaComponent = textAreaComponent;
+function HideableBoxModule(suffix, inputBoxComponent, module) {
+    BoxModule.call(this, suffix, inputBoxComponent);
+
+    this.DIV_HIDEABLE = 'hideable_' + suffix;
+
+    this.module = module;
 }
 
-GroupsComponent.prototype.getGroupsBox = function() {
-    return $('#input-groups_' + this.id);
+HideableBoxModule.prototype = new BoxModule();
+
+HideableBoxModule.prototype.render = function() {
+    var content = this.module.render();
+
+    return `
+        <div id="${this.DIV_HIDEABLE}" style="display: none;">
+          ${content}
+        </div>
+    `;
 };
 
-GroupsComponent.prototype.render = function() {
-    var html = '<div id="input-groups_' + this.id + '" class="col-lg-5" style="display: none;">'
-        + '<div class="panel-group">'
-         + '<div class="panel panel-default">'
+HideableBoxModule.prototype.showResults = function(result) {
+    var r = this.module.showResults(result);
+    if (r)
+        $('#' + this.DIV_HIDEABLE).show();
 
-          + '<div class="panel-heading">'
-           + '<h4 class="panel-title">'
-            + '<a data-toggle="collapse" href="#input-groups-collapse' + this.id + '">Groups</a>'
-           + '</h4>'
-          + '</div>'
-
-          + '<div id="input-groups-collapse' + this.id + '" class="panel-collapse collapse">'
-           + '<div class="panel-body">'
-            + '<table id="group-table_' + this.id + '" class="table table-hover">'
-             + '<thead><tr><th>ID</th><th>Start</th><th>End</th><th>Content</th></tr></thead>'
-             + '<tbody id="' + 'input-groups-rows_' + this.id + '"></tbody>'
-            + '</table>'
-           + '</div>'
-          + '</div>'
-
-         + '</div>'
-        + '</div>'
-        + '</div>'
-
-
-    return html;
+    return r;
 };
 
-GroupsComponent.prototype.showResults = function(result) {
+HideableBoxModule.prototype.clearResults = function() {
+    var r = this.module.clearResults();
+    $('#' + this.DIV_HIDEABLE).hide();
+    return r;
+};
+
+HideableBoxModule.prototype.createRequest = function(request) {
+    return this.module.createRequest(request);
+};
+
+
+// --- CollapsibleBoxModule extends BoxModule
+
+function CollapsibleBoxModule(suffix, inputBoxComponent, module) {
+    BoxModule.call(this, suffix, inputBoxComponent);
+
+    this.BTN_COLLAPSE = 'input-groups-collapse_' + suffix;
+
+    this.module = module;
+}
+
+CollapsibleBoxModule.prototype = new BoxModule();
+
+CollapsibleBoxModule.prototype.render = function() {
+    var content = this.module.render();
+
+    return `
+        <div class="col-lg-6">
+          <div class="panel-group">
+            <div class="panel panel-default">
+
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#${this.BTN_COLLAPSE}">Groups</a>
+                </h4>
+              </div>
+
+              <div id="${this.BTN_COLLAPSE}" class="panel-collapse collapse">
+                <div class="panel-body">
+                  ${content}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+    `;
+};
+
+CollapsibleBoxModule.prototype.showResults = function(result) {
+    return this.module.showResults(result)
+};
+
+CollapsibleBoxModule.prototype.clearResults = function() {
+    return this.module.clearResults();
+};
+
+CollapsibleBoxModule.prototype.createRequest = function(request) {
+    return this.module.createRequest(request);
+};
+
+
+// --- GroupTableBoxModule extends BoxModule
+
+function GroupTableBoxModule(suffix, inputBoxComponent) {
+    BoxModule.call(this, suffix, inputBoxComponent);
+
+    this.TABLE_GROUPS = 'group-table_' + suffix;
+    this.TABLE_GROUPS_BODY = 'input-groups-rows_' + suffix;
+
+    this.inputBoxComponent = inputBoxComponent;
+}
+
+GroupTableBoxModule.prototype = new BoxModule();
+
+GroupTableBoxModule.prototype.render = function() {
+    return `
+          <table id="${this.TABLE_GROUPS}" class="table table-hover">
+            <thead><tr><th>#</th><th>Start</th><th>End</th><th>Content</th></tr></thead>
+            <tbody id="${this.TABLE_GROUPS_BODY}"></tbody>
+          </table>
+    `;
+};
+
+GroupTableBoxModule.prototype.showResults = function(result) {
     if (result.groups.length > 0) {
-        var tableBody = $('#input-groups-rows_' + this.id);
+        var tableBody = $('#' + this.TABLE_GROUPS_BODY);
         tableBody.html('');  // clear
 
-        for (var j in result.groups) {
-            var group = result.groups[j];
-            var content = this.textAreaComponent.getText().substring(group.start, group.end);
-            var hID = 'group-table_' + this.id + "_" + j;
+        var textAreaBoxModule = this.inputBoxComponent.editorModule;
 
-            var html = '<tr>'
-                + '<td>' + (+j + 1) + '</td>'
-                + '<td>' + group.start + '</td>'
-                + '<td>' + group.end + '</td>'
-                + '<td class="group-content"><span>' + content + '</span></td>'
-                + '<td><a id="' + hID + '" class="btn btn-xs btn-default" href="#">Select</a></td>'
-                + '</tr>';
+        for (var j in result.groups) {
+            var id  = (+j + 1);
+            var group = result.groups[j];
+            var content = textAreaBoxModule.getText().substring(group.start, group.end);
+            var BTN_SELECT = this.TABLE_GROUPS + "-" + j;
+
+            var html = `
+                <tr>
+                  <td>${id}</td>
+                  <td>${group.start}</td>
+                  <td>${group.end}</td>
+                  <td class="group-content"><span>${content}</span></td>
+                  <td><a id="${BTN_SELECT}" class="btn btn-xs btn-default" href="#">Select</a></td>
+                </tr>
+            `;
 
             tableBody.append(html);
 
             // highlighting
             (function (id, ac, start, end) {
                 $('#' + id).on('click', function() {
-                    ac.highlight(start, end);
+                    ac.select(start, end);
                 });
-            })(hID, this.textAreaComponent, group.start, group.end);
+            })(BTN_SELECT, textAreaBoxModule, group.start, group.end);
         }
 
-        this.getGroupsBox().show();
+        return true;
     }
+    return false;
 };
 
-GroupsComponent.prototype.clearResults = function() {
-    this.getGroupsBox().hide();
+GroupTableBoxModule.prototype.clearResults = function() {
+    $('#' + this.TABLE_GROUPS_BODY).html('');
 };
 
 
 // --- InputBoxComponent
 
-function InputBoxComponent(id) {
-    this.id = id;
-    this.textAreaComponent = new TextAreaComponent(id);
-    this.groupsComponent = new GroupsComponent(id, this.textAreaComponent);
+function InputBoxComponent(suffix) {
+    this.suffix = suffix;
+    this.DIV_BOX = 'input-box_' + suffix;
+
+    this.editorModule = undefined;
+    this.allModules = [];
 }
 
-InputBoxComponent.prototype.getBox = function() {
-    return $('#input-box_' + this.id);
+InputBoxComponent.prototype.addModule = function(factory) {
+    var module = factory(this.suffix, this);
+    this.allModules.push(module);
+    return this;
+};
+
+InputBoxComponent.prototype.addEditorModule = function(factory) {
+    var module = factory(this.suffix, this);
+    this.editorModule = module;
+    this.allModules.push(module);
+    return this;
 };
 
 InputBoxComponent.prototype.render = function() {
-    return '<div id="input-box_' + this.id + '" class="input-box row">'
-            + '<div class="col-lg-12">'
-            + this.textAreaComponent.render()
-            + '</div>'
+    var components = "";
 
-            + this.groupsComponent.render()
-        + '</div>';
+    this.allModules.forEach(function(m) {
+        components += m.render();
+    });
+
+    return `
+        <div id="${this.DIV_BOX}" class="input-box row">
+          ${components}
+        </div>
+    `;
+};
+
+InputBoxComponent.prototype.getBox = function() {
+    return $('#' + this.DIV_BOX);
 };
 
 InputBoxComponent.prototype.showResults = function(result) {
     this.clearResults();
 
     var box = this.getBox();
-    if (result.match) {
-        box.addClass("test-passed");
+    if (result.hasOwnProperty('match')) {
 
-        // update groups
-        this.groupsComponent.showResults(result);
+        if (result.match) {
+            box.addClass("test-passed");
+
+            this.allModules.forEach(function(m) {
+                m.showResults(result);
+            });
+
+        } else {
+            box.addClass("test-failed");
+        }
 
     } else {
-        box.addClass("test-failed");
+        box.addClass("test-processed");
+
+        this.allModules.forEach(function(m) {
+            m.showResults(result);
+        });
     }
 };
 
@@ -158,26 +291,32 @@ InputBoxComponent.prototype.clearResults = function() {
     // update style/color
     box.removeClass("test-failed");
     box.removeClass("test-passed");
+    box.removeClass("test-processed");
 
-    // update groups
-   this.groupsComponent.clearResults();
+    this.allModules.forEach(function(m) {
+        m.clearResults();
+    });
 };
 
 
 // --- InputManager
 
-function InputManager(target) {
+function InputManager(suffix, target, inputBoxBuilder) {
+    this.inputBoxBuilder = inputBoxBuilder;
+    this.suffix = suffix;
     this.count = 0;
-    this.target = target;
+    this.targetID = target;
     this.inputs = [];
 }
 
 InputManager.prototype.addInput = function() {
-    var input = new InputBoxComponent(this.count++);
+    var input = new InputBoxComponent(this.suffix + '-' + this.count++);
+    this.inputBoxBuilder(input);  // init input box
+
     this.inputs.push(input);
 
     // render new input box
-    $(this.target).append(input.render());
+    $('#' + this.targetID).append(input.render());
 };
 
 InputManager.prototype.removeInput = function() {
@@ -189,9 +328,9 @@ InputManager.prototype.removeInput = function() {
     }
 };
 
-InputManager.prototype.collectInputs = function() {
+InputManager.prototype.createRequest = function(request) {
     return this.inputs.map(function(input) {
-        return input.textAreaComponent.getText();
+        return input.editorModule.createRequest(request);
     });
 };
 
@@ -203,13 +342,61 @@ InputManager.prototype.showResults = function(response) {
 };
 
 InputManager.prototype.clearAllResults = function() {
-    this.forEach(function(input) {
+    this.inputs.forEach(function(input) {
         input.clearResults();
     });
 };
 
-InputManager.prototype.forEach = function(func) {
-    for (var i in this.inputs) {
-        func(this.inputs[i]);
-    }
+
+// --- RegexMethodComponent
+
+function RegexMethodComponent(suffix, inputBoxBuilder, eval) {
+    this.eval = eval;
+
+    this.DIV_BOXES = 'text-inputs_' + suffix;
+    this.BUTTON_ADD = 'btn-add-input_' + suffix;
+    this.BUTTON_REMOVE = 'btn-remove-input_' + suffix;
+    this.BUTTON_EVAL = 'btn-eval_' + suffix;
+
+    this.inputManager = new InputManager(suffix, this.DIV_BOXES, inputBoxBuilder);
+}
+
+RegexMethodComponent.prototype.render = function() {
+    return `
+        <div id="${this.DIV_BOXES}" class="inputs-container"></div>
+        <a id="${this.BUTTON_ADD}" class="btn btn-large btn-default" href="#">+</a>
+        <a id="${this.BUTTON_REMOVE}" class="btn btn-large btn-default" href="#">-</a>
+        <a id="${this.BUTTON_EVAL}" class="btn btn-large btn-primary" href="#">Process</a>
+    `;
+};
+
+RegexMethodComponent.prototype.init = function() {
+    var inputManager = this.inputManager;
+    var evalFunction = this.eval;
+    var thisRef = this;
+
+    inputManager.addInput();
+
+    $('#' + this.BUTTON_ADD).on('click', function() {
+        inputManager.addInput();
+    });
+
+    $('#' + this.BUTTON_REMOVE).on('click', function() {
+        inputManager.removeInput();
+    });
+
+    $('#' + this.BUTTON_EVAL).on('click', function() {
+        var request = {};
+        inputManager.createRequest(request);
+
+        evalFunction(thisRef, request);
+    });
+};
+
+RegexMethodComponent.prototype.showResults = function(data) {
+    this.inputManager.showResults(data);
+};
+
+RegexMethodComponent.prototype.clearAllResults = function() {
+    this.inputManager.clearAllResults();
 };
