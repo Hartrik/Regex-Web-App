@@ -1,0 +1,10 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+deploy:
+  provider: heroku
+  app: java-regex
+  api_key:
+    secure: $HEROKU_API_KEY
