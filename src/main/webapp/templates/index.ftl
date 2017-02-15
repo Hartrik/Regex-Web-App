@@ -6,6 +6,7 @@
 
 <script type="text/javascript" src="js/server-api.js"></script>
 <script type="text/javascript" src="js/code-generation.js"></script>
+<script type="text/javascript" src="js/input-box-modules.js"></script>
 <script type="text/javascript" src="js/input-manager.js"></script>
 <script type="text/javascript">components = []</script>
 
@@ -70,7 +71,8 @@
       var builder = function(inputBox) {
         inputBox
             .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
-            .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))) });
+            .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
+            .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))); });
       };
 
       var eval = function(ins, request) {
@@ -98,7 +100,8 @@
       var builder = function(inputBox) {
         inputBox
             .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
-            .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)) });
+            .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
+            .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
       };
 
       var eval = function(ins, request) {
@@ -125,6 +128,7 @@
         var builder = function(inputBox) {
           inputBox
               .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+              .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
               .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
         };
 

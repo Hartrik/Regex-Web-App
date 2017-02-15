@@ -51,7 +51,12 @@
     font-size: 14px;
 }
 
+.input-box .panel-group {
+    margin-bottom: 0px;
+}
+
 .input-box table {
+    margin-bottom: 0px;
     font-size: 12px;
 }
 
@@ -59,10 +64,19 @@
     vertical-align: baseline;
 }
 
-.input-box table .group-content {
-    font-family: monospace;
+table .col-min {
+    width: 1px;
+    white-space: nowrap;
 }
 
-.input-box table .group-content span {
-    background-color: #5cb85c;
+table .col-max {
+    /* nothing */
+}
+
+.output-text {
+    font-family: monospace;
+    background-color: lightgray;
+
+    white-space: pre-wrap;
+    word-break: break-all;
 }
