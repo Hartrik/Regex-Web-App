@@ -8,7 +8,7 @@ import java.util.List;
  * @version 2017-02-13
  * @author Patrik Harag
  */
-public class ResultMatch {
+public class ResultMatch extends Result {
 
     private final boolean match;
     private final List<Group> groups;

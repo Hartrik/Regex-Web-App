@@ -4,6 +4,7 @@
 
 <#macro page_body>
 
+<script type="text/javascript" src="js/server-api.js"></script>
 <script type="text/javascript" src="js/code-generation.js"></script>
 <script type="text/javascript" src="js/input-manager.js"></script>
 <script type="text/javascript">components = []</script>
@@ -49,14 +50,16 @@
   function hideError() {
     $('#error-alert').hide();
   }
+  ServerApi.onErrorGlobal = showError;
+  ServerApi.onSuccessGlobal = hideError;
 </script>
 
 <!-- tab panel -->
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#t-match">Match</a></li>
   <li><a data-toggle="tab" href="#t-find">Find</a></li>
-  <li><a data-toggle="tab" href="#t-replace">Replace</a></li>
   <li><a data-toggle="tab" href="#t-split">Split</a></li>
+  <li><a data-toggle="tab" href="#t-replace">Replace</a></li>
 </ul>
 
 <div class="tab-content">
@@ -73,22 +76,10 @@
       var eval = function(ins, request) {
         request.pattern = $('#input-regex').val();
 
-        $.ajax({
-          type: "POST",
-          url: "/eval/match",
-          data: JSON.stringify(request),
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          success: function (data) {
-            if (data.exception !== null) {
-              showError(data.exception);
-            } else {
-              hideError();
-              ins.showResults(data);
-            }
-          },
-          failure: showError
+        ServerApi.evalMatch(request, function(data) {
+          ins.showResults(data);
         });
+
       };
 
       var component = new RegexMethodComponent('m', builder, eval);
@@ -100,13 +91,33 @@
     });
   </script>
 
-  <div id="t-find" class="tab-pane fade">
-    TODO
-  </div>
+  <div id="t-find" class="tab-pane fade"></div>
+  <script type="text/javascript">
+    $(document).ready(function () {
 
-  <div id="t-replace" class="tab-pane fade">
-    TODO
-  </div>
+      var builder = function(inputBox) {
+        inputBox
+            .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+            .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)) });
+      };
+
+      var eval = function(ins, request) {
+        request.pattern = $('#input-regex').val();
+
+        ServerApi.evalFindAll(request, function(data) {
+          ins.showResults(data);
+        });
+
+      };
+
+      var component = new RegexMethodComponent('f', builder, eval);
+
+      $('#t-find').html(component.render());
+      component.init();
+
+      components.push(component);
+    });
+  </script>
 
   <div id="t-split" class="tab-pane fade">
     <script type="text/javascript">
@@ -120,21 +131,8 @@
         var eval = function(ins, request) {
           request.pattern = $('#input-regex').val();
 
-          $.ajax({
-            type: "POST",
-            url: "/eval/split",
-            data: JSON.stringify(request),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-              if (data.exception !== null) {
-                showError(data.exception);
-              } else {
-                hideError();
-                ins.showResults(data);
-              }
-            },
-            failure: showError
+          ServerApi.evalSplit(request, function(data) {
+            ins.showResults(data);
           });
         };
 
@@ -146,6 +144,10 @@
         components.push(component);
       });
     </script>
+  </div>
+
+  <div id="t-replace" class="tab-pane fade">
+    TODO
   </div>
 </div>
 

@@ -1,5 +1,6 @@
 package cz.hartrik.jregex.service;
 
+import cz.hartrik.jregex.dto.Result;
 import java.util.regex.Pattern;
 
 /**
@@ -8,7 +9,7 @@ import java.util.regex.Pattern;
  * @author Patrik Harag
  * @version 2017-02-13
  */
-public interface RegexProvider<T> {
+public interface RegexProvider<T extends Result> {
 
     T apply(Pattern p, String input);
 

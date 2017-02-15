@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  *
- * @version 2017-02-13
+ * @version 2017-02-15
  * @author Patrik Harag
  */
 class EvalControllerTest extends HelperAbstractMvcTest {
@@ -53,6 +53,24 @@ class EvalControllerTest extends HelperAbstractMvcTest {
                 .andExpect(jsonPath("\$.results[0].groups[0].end").value(3))
                 .andExpect(jsonPath("\$.results[0].groups[1].start").value(4))
                 .andExpect(jsonPath("\$.results[0].groups[1].end").value(6))
+    }
+
+    // find-all
+
+    @Test
+    void findAllSimple() {
+        post("/eval/find-all", RegexRequest.create("_", ["_", "_a_"]))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("\$.exception").doesNotExist())
+                .andExpect(jsonPath("\$.results").exists())
+
+                .andExpect(jsonPath("\$.results[0].groups[0].start").value(0))
+                .andExpect(jsonPath("\$.results[0].groups[0].end").value(1))
+
+                .andExpect(jsonPath("\$.results[1].groups[0].start").value(0))
+                .andExpect(jsonPath("\$.results[1].groups[0].end").value(1))
+                .andExpect(jsonPath("\$.results[1].groups[1].start").value(2))
+                .andExpect(jsonPath("\$.results[1].groups[1].end").value(3))
     }
 
     // split

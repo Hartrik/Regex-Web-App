@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @version 2017-02-07
+ * @version 2017-02-15
  * @author Patrik Harag
  */
 @RestController
@@ -30,6 +30,11 @@ public class EvalController {
     @RequestMapping(value = "match", method = RequestMethod.POST)
     public RegexResponse<?> matchHandler(@RequestBody RegexRequest request) {
         return evaluator.match(request);
+    }
+
+    @RequestMapping(value = "find-all", method = RequestMethod.POST)
+    public RegexResponse<?> findAllHandler(@RequestBody RegexRequest request) {
+        return evaluator.findAll(request);
     }
 
     @RequestMapping(value = "split", method = RequestMethod.POST)

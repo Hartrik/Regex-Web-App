@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests basic things for every eval method.
  *
- * @version 2017-02-13
+ * @version 2017-02-15
  * @author Patrik Harag
  */
 @RunWith(Parameterized.class)
@@ -27,6 +27,7 @@ class EvalControllerGenericTest extends HelperAbstractMvcTest {
     @Parameterized.Parameters static Collection<Object[]> data() {
         def data = [
                 "/eval/match",
+                "/eval/find-all",
                 "/eval/split",
         ]
         return data.collect { [it] as Object[] }

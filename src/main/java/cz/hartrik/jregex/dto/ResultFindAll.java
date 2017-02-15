@@ -5,14 +5,14 @@ import java.util.List;
 
 /**
  *
- * @version 2017-02-13
+ * @version 2017-02-15
  * @author Patrik Harag
  */
-public class ResultSplit extends Result {
+public class ResultFindAll extends Result {
 
     private final List<Group> groups;
 
-    public ResultSplit(List<Group> groups) {
+    public ResultFindAll(List<Group> groups) {
         this.groups = Collections.unmodifiableList(groups);
     }
 
