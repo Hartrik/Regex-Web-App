@@ -1,6 +1,8 @@
 package cz.hartrik.jregex;
 
 import java.io.IOException;
+
+import cz.hartrik.jregex.config.BaseConfig;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -20,7 +22,6 @@ public class EmbeddedJetty {
     private static final int DEFAULT_PORT = 5000;
 
     private static final String CONTEXT_PATH = "/";
-    private static final String CONFIG_LOCATION_PACKAGE = "cz.hartrik.jregex.config";
     private static final String MAPPING_URL = "/";
     private static final String WEBAPP_DIRECTORY = "webapp";
 
@@ -75,7 +76,7 @@ public class EmbeddedJetty {
 
     private static WebApplicationContext getWebApplicationContext() {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.setConfigLocation(CONFIG_LOCATION_PACKAGE);
+        context.register(BaseConfig.class);
         return context;
     }
 

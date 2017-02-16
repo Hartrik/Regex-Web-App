@@ -2,19 +2,31 @@ package cz.hartrik.jregex.service;
 
 import cz.hartrik.jregex.dto.Group;
 import cz.hartrik.jregex.dto.ResultSplit;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  *
  * @author Patrik Harag
- * @version 2017-02-13
+ * @version 2017-02-16
  */
 @Service
-public class RegexSplitProvider implements RegexProvider<ResultSplit> {
+public class RegexSplitProvider extends AbstractRegexProvider<ResultSplit> {
+
+    public RegexSplitProvider() {
+        super();
+    }
+
+    @Autowired
+    public RegexSplitProvider(BiFunction<Pattern, String, Matcher> matcherProvider) {
+        super(matcherProvider);
+    }
 
     @Override
     public ResultSplit apply(Pattern p, String input) {
@@ -25,7 +37,7 @@ public class RegexSplitProvider implements RegexProvider<ResultSplit> {
     }
 
     private List<Group> split(Pattern p, String input) {
-        Matcher m = p.matcher(input);
+        Matcher m = createMatcher(p, input);
 
         ArrayList<String> matchList = new ArrayList<>();
         ArrayList<Group> groupList = new ArrayList<>();

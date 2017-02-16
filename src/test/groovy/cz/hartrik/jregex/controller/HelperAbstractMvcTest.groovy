@@ -1,6 +1,6 @@
 package cz.hartrik.jregex.controller
 
-import cz.hartrik.jregex.config.MVCConfig
+import cz.hartrik.jregex.config.BaseConfig
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -16,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext
  * @author Patrik Harag
  */
 @WebAppConfiguration
-@ContextConfiguration(classes = [ MVCConfig.class ])
+@ContextConfiguration(classes = [ BaseConfig.class ])
 abstract class HelperAbstractMvcTest {
 
     // I always try not to use inheritance in unit testing.

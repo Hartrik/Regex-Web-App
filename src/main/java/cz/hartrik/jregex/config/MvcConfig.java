@@ -1,7 +1,6 @@
 package cz.hartrik.jregex.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -12,16 +11,12 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 /**
  *
- * @version 2017-02-07
+ * @version 2017-02-16
  * @author Patrik Harag
  */
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = {
-    "cz.hartrik.jregex.controller",
-    "cz.hartrik.jregex.service"}
-)
-public class MVCConfig extends WebMvcConfigurerAdapter {
+public class MvcConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry reg) {
