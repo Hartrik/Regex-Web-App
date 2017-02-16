@@ -16,6 +16,10 @@
     <textarea id="input-regex" class="form-control" rows="3" spellcheck="false"
               placeholder="Type your regex here..."></textarea>
     <script type="text/javascript">
+      function getPattern() {
+          return $('#input-regex').val();
+      }
+
       $(document).ready(function () {
         $("#input-regex").keyup(function (e) {
           components.forEach(function (i) { i.clearAllResults(); });
@@ -31,7 +35,7 @@
     <script type="text/javascript">
       $(document).ready(function () {
         $('#btn-copy-regex').on('click', function () {
-          var pattern = $('#input-regex').val();
+          var pattern = getPattern();
           ClipboardUtils.copy(CodeGenerator.asJavaString(pattern));
         });
       });
@@ -56,102 +60,80 @@
 </script>
 
 <!-- tab panel -->
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#t-match">Match</a></li>
-  <li><a data-toggle="tab" href="#t-find">Find</a></li>
-  <li><a data-toggle="tab" href="#t-split">Split</a></li>
-  <li><a data-toggle="tab" href="#t-replace">Replace</a></li>
-</ul>
+<div class="row">
+  <div class="col-lg-10">
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle="tab" href="#t-match">Match</a></li>
+      <li><a data-toggle="tab" href="#t-find">Find</a></li>
+      <li><a data-toggle="tab" href="#t-split">Split</a></li>
+      <li><a data-toggle="tab" href="#t-replace">Replace</a></li>
+    </ul>
 
-<div class="tab-content">
-  <div id="t-match" class="tab-pane fade in active"></div>
-  <script type="text/javascript">
-    $(document).ready(function () {
+    <div class="tab-content">
+      <div id="t-match" class="tab-pane fade in active"></div>
+      <script type="text/javascript">
+        $(document).ready(function () {
 
-      var builder = function(inputBox) {
-        inputBox
-            .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
-            .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
-            .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))); });
-      };
+          var builder = function(inputBox) {
+            inputBox
+                .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+                .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
+                .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))); });
+          };
 
-      var eval = function(ins, request) {
-        request.pattern = $('#input-regex').val();
+          var component = new InputManagerComponent('m', builder, ServerApi.evalMatch, getPattern);
 
-        ServerApi.evalMatch(request, function(data) {
-          ins.showResults(data);
+          $('#t-match').html(component.render());
+          component.init();
+
+          components.push(component);
         });
+      </script>
 
-      };
+      <div id="t-find" class="tab-pane fade"></div>
+      <script type="text/javascript">
+        $(document).ready(function () {
 
-      var component = new RegexMethodComponent('m', builder, eval);
+          var builder = function(inputBox) {
+            inputBox
+                .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+                .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
+                .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
+          };
 
-      $('#t-match').html(component.render());
-      component.init();
+          var component = new InputManagerComponent('f', builder, ServerApi.evalFindAll, getPattern);
 
-      components.push(component);
-    });
-  </script>
+          $('#t-find').html(component.render());
+          component.init();
 
-  <div id="t-find" class="tab-pane fade"></div>
-  <script type="text/javascript">
-    $(document).ready(function () {
-
-      var builder = function(inputBox) {
-        inputBox
-            .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
-            .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
-            .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
-      };
-
-      var eval = function(ins, request) {
-        request.pattern = $('#input-regex').val();
-
-        ServerApi.evalFindAll(request, function(data) {
-          ins.showResults(data);
+          components.push(component);
         });
+      </script>
 
-      };
+      <div id="t-split" class="tab-pane fade">
+        <script type="text/javascript">
+          $(document).ready(function () {
+            var builder = function(inputBox) {
+              inputBox
+                  .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
+                  .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
+                  .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
+            };
 
-      var component = new RegexMethodComponent('f', builder, eval);
+            var component = new InputManagerComponent('s', builder, ServerApi.evalSplit, getPattern);
 
-      $('#t-find').html(component.render());
-      component.init();
+            $('#t-split').html(component.render());
+            component.init();
 
-      components.push(component);
-    });
-  </script>
-
-  <div id="t-split" class="tab-pane fade">
-    <script type="text/javascript">
-      $(document).ready(function () {
-        var builder = function(inputBox) {
-          inputBox
-              .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
-              .addModule(function(s, t) { return new SeparatorBoxModule(s, t, 10); })
-              .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
-        };
-
-        var eval = function(ins, request) {
-          request.pattern = $('#input-regex').val();
-
-          ServerApi.evalSplit(request, function(data) {
-            ins.showResults(data);
+            components.push(component);
           });
-        };
+        </script>
+      </div>
 
-        var component = new RegexMethodComponent('s', builder, eval);
-
-        $('#t-split').html(component.render());
-        component.init();
-
-        components.push(component);
-      });
-    </script>
-  </div>
-
-  <div id="t-replace" class="tab-pane fade">
-    TODO
+      <div id="t-replace" class="tab-pane fade">
+        TODO
+      </div>
+    </div>
   </div>
 </div>
 

@@ -14,8 +14,10 @@ NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
 
 // --- InputBoxComponent
 
-function InputBoxComponent(suffix) {
+function InputBoxComponent(inputManager, suffix) {
+    this.inputManager = inputManager;
     this.suffix = suffix;
+
     this.DIV_BOX = 'input-box_' + suffix;
 
     this.editorModule = undefined;
@@ -47,6 +49,12 @@ InputBoxComponent.prototype.render = function() {
           ${components}
         </div>
     `;
+};
+
+InputBoxComponent.prototype.init = function() {
+    this.allModules.forEach(function(m) {
+        m.init();
+    });
 };
 
 InputBoxComponent.prototype.getBox = function() {
@@ -93,69 +101,24 @@ InputBoxComponent.prototype.clearResults = function() {
 };
 
 
-// --- InputManager
+// --- InputManagerComponent
 
-function InputManager(suffix, target, inputBoxBuilder) {
-    this.inputBoxBuilder = inputBoxBuilder;
+function InputManagerComponent(suffix, inputBoxBuilder, evalProvider, patternProvider) {
     this.suffix = suffix;
-    this.count = 0;
-    this.targetID = target;
+    this.inputBoxBuilder = inputBoxBuilder;
+    this.evalProvider = evalProvider;
+    this.patternProvider = patternProvider;
+
     this.inputs = [];
-}
-
-InputManager.prototype.addInput = function() {
-    var input = new InputBoxComponent(this.suffix + '-' + this.count++);
-    this.inputBoxBuilder(input);  // init input box
-
-    this.inputs.push(input);
-
-    // render new input box
-    $('#' + this.targetID).append(input.render());
-};
-
-InputManager.prototype.removeInput = function() {
-    if (this.count > 1) {
-        var last = this.inputs.pop();
-
-        last.getBox().remove();
-        this.count--;
-    }
-};
-
-InputManager.prototype.createRequest = function(request) {
-    return this.inputs.map(function(input) {
-        return input.editorModule.createRequest(request);
-    });
-};
-
-InputManager.prototype.showResults = function(response) {
-    for (var i in response.results) {
-        var result = response.results[i];
-        this.inputs[i].showResults(result);
-    }
-};
-
-InputManager.prototype.clearAllResults = function() {
-    this.inputs.forEach(function(input) {
-        input.clearResults();
-    });
-};
-
-
-// --- RegexMethodComponent
-
-function RegexMethodComponent(suffix, inputBoxBuilder, eval) {
-    this.eval = eval;
+    this.count = 0;
 
     this.DIV_BOXES = 'text-inputs_' + suffix;
     this.BUTTON_ADD = 'btn-add-input_' + suffix;
     this.BUTTON_REMOVE = 'btn-remove-input_' + suffix;
     this.BUTTON_EVAL = 'btn-eval_' + suffix;
-
-    this.inputManager = new InputManager(suffix, this.DIV_BOXES, inputBoxBuilder);
 }
 
-RegexMethodComponent.prototype.render = function() {
+InputManagerComponent.prototype.render = function() {
     return `
         <div id="${this.DIV_BOXES}" class="inputs-container"></div>
         <a id="${this.BUTTON_ADD}" class="btn btn-large btn-default" href="#/">+</a>
@@ -164,33 +127,77 @@ RegexMethodComponent.prototype.render = function() {
     `;
 };
 
-RegexMethodComponent.prototype.init = function() {
-    var inputManager = this.inputManager;
-    var evalFunction = this.eval;
+InputManagerComponent.prototype.init = function() {
     var thisRef = this;
 
-    inputManager.addInput();
+    thisRef.addInput();
 
     $('#' + this.BUTTON_ADD).on('click', function() {
-        inputManager.addInput();
+        thisRef.addInput();
     });
 
     $('#' + this.BUTTON_REMOVE).on('click', function() {
-        inputManager.removeInput();
+        thisRef.removeInput();
     });
 
     $('#' + this.BUTTON_EVAL).on('click', function() {
-        var request = {};
-        inputManager.createRequest(request);
-
-        evalFunction(thisRef, request);
+        thisRef.eval(thisRef.inputs);
     });
 };
 
-RegexMethodComponent.prototype.showResults = function(data) {
-    this.inputManager.showResults(data);
+InputManagerComponent.prototype.addInput = function() {
+    var input = new InputBoxComponent(this, this.suffix + '-' + this.count++);
+
+    // add modules
+    this.inputBoxBuilder(input);
+
+    // render input box
+    $('#' + this.DIV_BOXES).append(input.render());
+
+    // init input box
+    input.init();
+
+    this.inputs.push(input);
 };
 
-RegexMethodComponent.prototype.clearAllResults = function() {
-    this.inputManager.clearAllResults();
+InputManagerComponent.prototype.removeInput = function() {
+    if (this.count > 1) {
+        var last = this.inputs.pop();
+
+        last.getBox().remove();
+        this.count--;
+    }
+};
+
+InputManagerComponent.prototype.createRequest = function(selectedInputs) {
+    var request = {
+        pattern: this.patternProvider(),
+    };
+
+    selectedInputs.forEach(function(input) {
+        return input.editorModule.createRequest(request);
+    });
+
+    return request;
+};
+
+InputManagerComponent.prototype.eval = function(selectedInputs) {
+    var thisRef = this;
+
+    this.evalProvider(this.createRequest(selectedInputs), function(data) {
+        thisRef.showResults(selectedInputs, data);
+    });
+};
+
+InputManagerComponent.prototype.showResults = function(selectedInputs, response) {
+    var results = response.results;
+    selectedInputs.forEach(function(input) {
+        input.showResults(results.shift());
+    });
+};
+
+InputManagerComponent.prototype.clearAllResults = function() {
+    this.inputs.forEach(function(input) {
+        input.clearResults();
+    });
 };

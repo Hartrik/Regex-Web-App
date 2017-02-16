@@ -1,9 +1,13 @@
 
 // --- BoxModule
 
-function BoxModule(suffix, inputBoxComponent) {}
+function BoxModule(suffix, inputBoxComponent) {
+    this.suffix = suffix;
+    this.inputBoxComponent = inputBoxComponent;
+}
 
 BoxModule.prototype.render = function() {};
+BoxModule.prototype.init = function() {};
 BoxModule.prototype.createRequest = function(request) {};
 BoxModule.prototype.showResults = function(result /* part of response */) {};
 BoxModule.prototype.clearResults = function() {};
@@ -19,8 +23,20 @@ function TextAreaBoxModule(suffix, inputBoxComponent) {
 
 TextAreaBoxModule.prototype = new BoxModule();
 
-TextAreaBoxModule.prototype.getText = function() {
-    return $('#' + this.TEXT_AREA).val();
+TextAreaBoxModule.prototype.render = function() {
+    return `
+        <textarea id="${this.TEXT_AREA}" class="form-control input-textarea"
+                  rows="3" spellcheck="false"></textarea>
+    `;
+};
+
+TextAreaBoxModule.prototype.init = function() {
+    var input = this.inputBoxComponent;
+    $('#' + this.TEXT_AREA).keydown(function(e) {
+        if ((e.keyCode === 0 || e.keyCode === 32) && e.ctrlKey) {
+            input.inputManager.eval([ input ]);
+        }
+    });
 };
 
 TextAreaBoxModule.prototype.createRequest = function(request) {
@@ -31,11 +47,8 @@ TextAreaBoxModule.prototype.createRequest = function(request) {
     request.inputs.push(this.getText());
 };
 
-TextAreaBoxModule.prototype.render = function() {
-    return `
-        <textarea id="${this.TEXT_AREA}" class="form-control input-textarea"
-                  rows="3" spellcheck="false"></textarea>
-    `;
+TextAreaBoxModule.prototype.getText = function() {
+    return $('#' + this.TEXT_AREA).val();
 };
 
 TextAreaBoxModule.prototype.select = function(start, end) {
@@ -46,17 +59,56 @@ TextAreaBoxModule.prototype.select = function(start, end) {
 };
 
 
-// --- HideableBoxModule extends BoxModule
+// --- EnclosingBoxModule extends BoxModule
 
-function HideableBoxModule(suffix, inputBoxComponent, module) {
+function EnclosingBoxModule(suffix, inputBoxComponent, module) {
     BoxModule.call(this, suffix, inputBoxComponent);
-
-    this.DIV_HIDEABLE = 'hideable_' + suffix;
 
     this.module = module;
 }
 
-HideableBoxModule.prototype = new BoxModule();
+EnclosingBoxModule.prototype = new BoxModule();
+
+EnclosingBoxModule.prototype.render = function() {
+    return this.module.render();
+};
+
+EnclosingBoxModule.prototype.init = function() {
+    return this.module.init();
+};
+
+EnclosingBoxModule.prototype.showResults = function(result) {
+    return this.module.showResults(result)
+};
+
+EnclosingBoxModule.prototype.clearResults = function() {
+    return this.module.clearResults();
+};
+
+EnclosingBoxModule.prototype.createRequest = function(request) {
+    return this.module.createRequest(request);
+};
+
+// editor
+EnclosingBoxModule.prototype.getText = function() {
+    return this.module.getText();
+};
+
+// editor
+EnclosingBoxModule.prototype.select = function(start, end) {
+    return this.module.select(start, end);
+};
+
+
+// --- HideableBoxModule extends EnclosingBoxModule
+
+function HideableBoxModule(suffix, inputBoxComponent, module) {
+    EnclosingBoxModule.call(this, suffix, inputBoxComponent, module);
+
+    this.DIV_HIDEABLE = 'hideable_' + suffix;
+}
+
+HideableBoxModule.prototype = new EnclosingBoxModule();
 
 HideableBoxModule.prototype.render = function() {
     var content = this.module.render();
@@ -82,22 +134,16 @@ HideableBoxModule.prototype.clearResults = function() {
     return r;
 };
 
-HideableBoxModule.prototype.createRequest = function(request) {
-    return this.module.createRequest(request);
-};
 
-
-// --- CollapsibleBoxModule extends BoxModule
+// --- CollapsibleBoxModule extends EnclosingBoxModule
 
 function CollapsibleBoxModule(suffix, inputBoxComponent, module) {
-    BoxModule.call(this, suffix, inputBoxComponent);
+    EnclosingBoxModule.call(this, suffix, inputBoxComponent, module);
 
     this.BTN_COLLAPSE = 'input-groups-collapse_' + suffix;
-
-    this.module = module;
 }
 
-CollapsibleBoxModule.prototype = new BoxModule();
+CollapsibleBoxModule.prototype = new EnclosingBoxModule();
 
 CollapsibleBoxModule.prototype.render = function() {
     var content = this.module.render();
@@ -121,18 +167,6 @@ CollapsibleBoxModule.prototype.render = function() {
         </div>
         </div>
     `;
-};
-
-CollapsibleBoxModule.prototype.showResults = function(result) {
-    return this.module.showResults(result)
-};
-
-CollapsibleBoxModule.prototype.clearResults = function() {
-    return this.module.clearResults();
-};
-
-CollapsibleBoxModule.prototype.createRequest = function(request) {
-    return this.module.createRequest(request);
 };
 
 
@@ -248,3 +282,5 @@ OutputTextComponent.render = function(text) {
           <span class="output-text">${escaped}</span>
     `;
 };
+
+//
