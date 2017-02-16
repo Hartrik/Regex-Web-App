@@ -3,9 +3,6 @@ language: java
 jdk:
   - oraclejdk8
 
-before_install:
-  - chmod +x mvnw
-
 deploy:
   provider: heroku
   app: java-regex
