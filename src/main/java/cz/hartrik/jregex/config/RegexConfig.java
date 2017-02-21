@@ -12,12 +12,20 @@ import java.util.regex.Pattern;
  *
  *
  * @author Patrik Harag
- * @version 2017-02-16
+ * @version 2017-02-21
  */
 @Configuration
 public class RegexConfig {
 
-    private static int TIMEOUT_MILLIS = 2_000;
+    /**
+     * Max number of inputs to process for one request.
+     */
+    public static final int MAX_INPUTS = 10;
+
+    /**
+     * Timeout for one input.
+     */
+    private static final int TIMEOUT_MILLIS = 1_000;
 
     @Bean
     public BiFunction<Pattern, String, Matcher> matcherProvider() {

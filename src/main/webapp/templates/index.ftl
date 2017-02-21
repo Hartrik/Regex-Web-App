@@ -70,10 +70,26 @@
     </ul>
 
     <div class="tab-content">
+      <script type="text/javascript">
+        function initTab(target, prefix, builder, evalFunc) {
+          var component = new InputManagerComponent(prefix, builder, evalFunc, getPattern);
+
+          // limit inputs
+          component.addInput = function() {
+              if (this.count < ${MAX_INPUTS})
+                InputManagerComponent.prototype.addInput.call(this);
+          };
+
+          $(target).html(component.render());
+          component.init();
+
+          components.push(component);
+        }
+      </script>
+
       <div id="t-match" class="tab-pane fade in active"></div>
       <script type="text/javascript">
         $(document).ready(function () {
-
           var builder = function(inputBox) {
             inputBox
                 .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
@@ -81,19 +97,13 @@
                 .addModule(function(s, t) { return new HideableBoxModule(s, t, new CollapsibleBoxModule(s, t, new GroupTableBoxModule(s, t))); });
           };
 
-          var component = new InputManagerComponent('m', builder, ServerApi.evalMatch, getPattern);
-
-          $('#t-match').html(component.render());
-          component.init();
-
-          components.push(component);
+          initTab('#t-match', 'm', builder, ServerApi.evalMatch);
         });
       </script>
 
       <div id="t-find" class="tab-pane fade"></div>
       <script type="text/javascript">
         $(document).ready(function () {
-
           var builder = function(inputBox) {
             inputBox
                 .addEditorModule(function(s, t) { return new TextAreaBoxModule(s, t); })
@@ -101,12 +111,7 @@
                 .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
           };
 
-          var component = new InputManagerComponent('f', builder, ServerApi.evalFindAll, getPattern);
-
-          $('#t-find').html(component.render());
-          component.init();
-
-          components.push(component);
+          initTab('#t-find', 'f', builder, ServerApi.evalFindAll);
         });
       </script>
 
@@ -120,12 +125,7 @@
                   .addModule(function(s, t) { return new HideableBoxModule(s, t, new GroupTableBoxModule(s, t)); });
             };
 
-            var component = new InputManagerComponent('s', builder, ServerApi.evalSplit, getPattern);
-
-            $('#t-split').html(component.render());
-            component.init();
-
-            components.push(component);
+            initTab('#t-split', 's', builder, ServerApi.evalSplit);
           });
         </script>
       </div>

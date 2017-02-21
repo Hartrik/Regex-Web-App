@@ -1,5 +1,6 @@
 package cz.hartrik.jregex.service;
 
+import cz.hartrik.jregex.config.RegexConfig;
 import cz.hartrik.jregex.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @version 2017-02-15
+ * @version 2017-02-21
  * @author Patrik Harag
  */
 @Service
@@ -39,6 +40,7 @@ public class RegexEvaluator {
         try {
             Pattern p = createPattern(request);
             List<T> results = request.getInputs().stream()
+                    .limit(RegexConfig.MAX_INPUTS)
                     .map(input -> provider.apply(p, input))
                     .collect(Collectors.toList());
 
