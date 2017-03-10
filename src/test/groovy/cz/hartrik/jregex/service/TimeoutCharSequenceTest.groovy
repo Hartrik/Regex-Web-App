@@ -14,8 +14,8 @@ class TimeoutCharSequenceTest {
     void testWorksProperly() {
         def p = Pattern.compile('abc')
 
-        assert   p.matcher(new TimeoutCharSequence("abc", 1000)).matches()
-        assert ! p.matcher(new TimeoutCharSequence("abcd", 1000)).matches()
+        assert   p.matcher(TimeoutCharSequence.of("abc", 1000)).matches()
+        assert ! p.matcher(TimeoutCharSequence.of("abcd", 1000)).matches()
     }
 
     // ---
@@ -30,13 +30,13 @@ class TimeoutCharSequenceTest {
 
     @Test(expected = RuntimeException)
     void testStop200() {
-        def safe = new TimeoutCharSequence(dangerousInput, 200)
+        def safe = TimeoutCharSequence.of(dangerousInput, 200)
         dangerousPattern.matcher(safe).matches()
     }
 
     @Test(expected = RuntimeException)
     void testStop100() {
-        def safe = new TimeoutCharSequence(dangerousInput, 100)
+        def safe = TimeoutCharSequence.of(dangerousInput, 100)
         dangerousPattern.matcher(safe).matches()
     }
 

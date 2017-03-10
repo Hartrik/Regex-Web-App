@@ -29,7 +29,7 @@ public class RegexConfig {
 
     @Bean
     public BiFunction<Pattern, String, Matcher> matcherProvider() {
-        return (pattern, s) -> pattern.matcher(new TimeoutCharSequence(s, TIMEOUT_MILLIS));
+        return (pattern, s) -> pattern.matcher(TimeoutCharSequence.of(s, TIMEOUT_MILLIS));
     }
 
 }

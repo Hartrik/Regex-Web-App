@@ -3,39 +3,30 @@ package cz.hartrik.jregex.service;
 /**
  *
  * @author Patrik Harag
- * @version 2017-02-16
+ * @version 2017-03-10
  */
 public final class TimeoutCharSequence implements CharSequence {
 
-    private final CharSequence string;
-
-    private final int timeoutMillis;
-    private final long start;
-    private final long timeout;
-
-    private int charAtCalled = 0;
-
-    private static final int CHECK = 1024*1024;
+    private static final int CHECK_EVERY = 1024*1024;
     private static final String ERR_MESSAGE_FORMAT = "Timeout, terminated after %.2f s";
 
-    public TimeoutCharSequence(CharSequence string, int timeoutMillis) {
-        this(string, timeoutMillis, 0);
-    }
+    private final CharSequence string;
+    private final long start;
+    private final long end;
+    private int checkCalled = 0;
 
-    private TimeoutCharSequence(CharSequence inner, int timeoutMillis, int charAtCalled) {
-        this.string = inner;
+    private TimeoutCharSequence(CharSequence string, long start, long end, int called) {
+        this.string = string;
+        this.checkCalled = called;
 
-        this.timeoutMillis = timeoutMillis;
-        this.start = System.currentTimeMillis();
-        this.timeout = start + timeoutMillis;
-
-        this.charAtCalled = charAtCalled;
+        this.start = start;
+        this.end = end;
     }
 
     private void check() {
-        if (charAtCalled++ % CHECK == 0) {
+        if (checkCalled++ % CHECK_EVERY == 0) {
             long time = System.currentTimeMillis();
-            if (time > timeout) {
+            if (time > end) {
                 double s = (double) (time - start) / 1000;
                 throw new RuntimeException(String.format(ERR_MESSAGE_FORMAT, s));
             }
@@ -50,7 +41,10 @@ public final class TimeoutCharSequence implements CharSequence {
 
     @Override
     public TimeoutCharSequence subSequence(int start, int end) {
-        return new TimeoutCharSequence(string.subSequence(start, end), timeoutMillis);
+        CharSequence subSequence = string.subSequence(start, end);
+
+        return new TimeoutCharSequence(
+                subSequence, this.start, this.end, this.checkCalled);
     }
 
     @Override
@@ -62,4 +56,12 @@ public final class TimeoutCharSequence implements CharSequence {
     public String toString() {
         return string.toString();
     }
+
+    public static TimeoutCharSequence of(CharSequence string, int millis) {
+        long start = System.currentTimeMillis();
+        long end = start + millis;
+
+        return new TimeoutCharSequence(string, start, end, 0);
+    }
+
 }
